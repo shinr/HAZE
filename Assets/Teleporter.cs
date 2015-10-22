@@ -14,21 +14,21 @@ public class Teleporter : MonoBehaviour {
     {
         if (!receiving && !receiveOnly)
         {
-            Vector3 angles = pair.transform.rotation.eulerAngles - transform.rotation.eulerAngles;
-            float angle = Quaternion.Angle(transform.rotation, pair.transform.rotation);
-            pair.GetComponent<Teleporter>().ReceiveTeleport(other, transform.position, angles);
+            Quaternion rotation = Quaternion.FromToRotation(transform.forward, pair.transform.forward);
+            pair.GetComponent<Teleporter>().ReceiveTeleport(other, transform.position, rotation);
         }
         receiving = false;
     }
 
-    public void ReceiveTeleport(Collider other, Vector3 origin, Vector3 angles)
+    public void ReceiveTeleport(Collider other, Vector3 origin, Quaternion rotation)
     {
         receiving = true;
         Vector3 newPosition = transform.position - (origin - other.gameObject.transform.position);
         other.gameObject.transform.position = newPosition;
+        Vector3 angles = rotation * other.gameObject.transform.forward;
         if (angles != Vector3.zero)
         {
-            other.gameObject.GetComponent<CameraControl>().RotateMouse(new Vector2(angles.y, angles.x));
+            other.gameObject.GetComponent<CameraControl>().RotateMouse(new Vector2(angles.x, angles.y));
             other.gameObject.transform.RotateAround(transform.position, transform.up, angles.y);  // this is probably not right
             PlayerControls controls = other.gameObject.GetComponent<PlayerControls>();
             CharacterController controller = other.gameObject.GetComponent<CharacterController>();
